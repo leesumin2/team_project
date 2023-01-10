@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.teamProject.cdcd.cafeMapper">
+
+	
+	<sql id="cafecolumn">
+			cafe.cafe_id, 
+			cafe.cafe_name, 
+			cafe.cafe_img, 
+			cafe_info, 
+			cafe_num, 
+			cafe.cafe_addr1, 
+			cafe.cafe_addr2, 
+			cafe.cafe_addr3, 
+			cafe.cafe_addr4, 
+			cafe_open, 
+			cafe_close,
+			round((avg(coffee_score) + avg(dessert_score) + avg(mood_score))/3, 1) as total_avg
+	</sql>
+	
+
+
+	<insert id="insert" parameterType="CafeDto" useGeneratedKeys="true" keyProperty="cafe_id">
+			insert into cafe (
+							cafe_name, 
+							cafe_img, 
+							cafe_info, 
+							cafe_num, 
+							cafe_addr1, 
+							cafe_addr2, 
+							cafe_addr3, 
+							cafe_addr4, 
+							cafe_open,
+							cafe_close
+						) 
+							
+						values (
+							#{cafe_name},
+							#{cafe_img}, 
+							#{cafe_info}, 
+							#{cafe_num}, 
+							#{cafe_addr1}, 
+							#{cafe_addr2}, 
+							#{cafe_addr3}, 
+							#{cafe_addr4}, 
+							#{cafe_open},
+							#{cafe_close}
+						)
+
+	</insert>
+
+
+
+	<update id="update" parameterType="CafeDto">
+		update cafe set
+						cafe_name = #{cafe_name},
+						cafe_img = #{cafe_img}, 
+						cafe_info = #{cafe_info}, 
+						cafe_num = #{cafe_num}, 
+						cafe_addr1 = #{cafe_addr1}, 
+						cafe_addr2 = #{cafe_addr2}, 
+						cafe_addr3 = #{cafe_addr3}, 
+						cafe_addr4 = #{cafe_addr4}, 
+						cafe_open = #{cafe_open},
+						cafe_close = #{cafe_close}
+						
+					where cafe_id = #{cafe_id}
+				
+	</update>
+
+	<delete id="delete">
+		delete from cafe where cafe_id=#{cafe_id}
+	</delete>
+
+
+
+	<select id="selectAll" parameterType="SearchOption" resultType="CafeDto">
+		select
+			
+			<include refid="cafecolumn"></include>,
+			
+			round(avg(coffee_score), 1) as coffee_avg,
+			round(avg(dessert_score), 1) as dessert_avg,
+			round(avg(mood_score), 1) as mood_avg
+				
+			from cafe
+				left outer join review
+					on review.cafe_id = cafe.cafe_id
+					
+			group by cafe_id
+			
+			LIMIT #{offset}, #{pageSize}
+	</select>
+		
+	
+	<select id="cafeCount" resultType="int">
+		select count(*) from cafe
+	</select>
+			
+		
+	<select id="selectCafe" resultType="CafeDto">
+		select	
+			
+			<include refid="cafecolumn"></include>,
+			
+			round(avg(coffee_score), 1) as coffee_avg,
+			round(avg(dessert_score), 1) as dessert_avg,
+			round(avg(mood_score), 1) as mood_avg
+			
+			from cafe
+					left outer join review
+						on review.cafe_id = cafe.cafe_id
+				
+			where cafe.cafe_id=#{cafe_id}
+			
+	</select> 
+
+
+	
+	<select id="search_K" parameterType="SearchOption" resultType="CafeDto">		
+		select
+			
+			<include refid="cafecolumn"></include>
+
+			from cafe
+					left outer join menu
+						on cafe.cafe_id = menu.cafe_id
+					left outer join review
+						on cafe.cafe_id = review.cafe_id
+					left outer join bookmark
+						on cafe.cafe_id = bookmark.cafe_id
+						
+			where cafe_name like concat('%', #{keyword}, '%')
+					or cafe_addr1 like concat('%', #{keyword}, '%')
+					or cafe_addr2 like concat('%', #{keyword}, '%')
+					or cafe_addr3 like concat('%', #{keyword}, '%')
+					or menu_signature like concat('%', #{keyword}, '%')
+					
+			group by cafe_id
+							
+			<choose>
+				<when test='sort == "G"'>
+					order by total_avg DESC, count(DISTINCT review_id) DESC, count(DISTINCT bm_id) DESC, cafe_name
+				</when>
+				<when test='sort == "R"'>
+					order by count(DISTINCT review_id) DESC, total_avg DESC, count(DISTINCT bm_id) DESC, cafe_name
+				</when>
+				<when test='sort == "B"'>
+					order by count(DISTINCT bm_id) DESC, total_avg DESC, count(DISTINCT review_id) DESC, cafe_name
+				</when>
+				<otherwise>
+					order by cafe_id
+				</otherwise>
+			</choose>
+			limit #{offset}, #{pageSize}
+	</select>
+
+	
+	
+	
+	
+	
+</mapper>

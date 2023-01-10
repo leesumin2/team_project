@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.green.cdcd.reviewlikeMapper">
+
+	<insert id="insert" parameterType="ReviewLikeDto">
+		insert into review_like(mem_id, review_id) values (#{mem_id}, #{review_id})
+	</insert>
+	
+	<select id="selectAll" resultType="ReviewLikeDto">
+		select like_id, mem_id, review_id from review_like 
+	</select>
+	
+	<select id="likecount" resultType="int">
+		select count(like_id) from review_like WHERE review_id=#{review_id};
+	</select> 
+	
+	<select id="likefindid" resultType="int" parameterType="map">
+		select count(*) from review_like where review_id=#{review_id} and mem_id=#{mem_id};
+	</select> 
+	
+	<delete id="delete" parameterType="map">
+		delete from review_like where review_id=#{review_id} and mem_id=#{mem_id}
+	</delete>
+			
+</mapper>

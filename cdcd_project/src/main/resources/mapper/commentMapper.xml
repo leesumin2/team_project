@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.greenart.CommentMapper">
+    <delete id="deleteAll" parameterType="int">
+        DELETE FROM ask_coment
+        WHERE  ask_id = #{ask_id}
+    </delete>
+
+    <select id="count" parameterType="int" resultType="int">
+        SELECT count(*) FROM ask_coment
+        WHERE  ask_id = #{ask_id}
+    </select>
+
+    <delete id="delete" parameterType="map">
+        DELETE FROM ask_coment WHERE a_coment_id = #{a_coment_id} AND mem_id = #{mem_id}
+    </delete>
+
+    <insert id="insert" parameterType="CommentDto">
+        INSERT INTO ask_coment
+            (ask_id,  a_coment_content, mem_id, a_coment_date, a_comment_update)
+        VALUES
+            (#{ask_id}, #{a_coment_content}, #{mem_id}, now(), now())
+    </insert>
+
+    <select id="selectAll" parameterType="int" resultType="CommentDto">
+        SELECT a_coment_id, ask_id,  a_coment_content, mem_id, a_coment_date, a_comment_update
+        FROM ask_coment
+        WHERE ask_id = #{ask_id}
+        ORDER BY a_coment_date ASC, a_coment_id ASC
+    </select>
+
+    <select id="select" parameterType="int" resultType="CommentDto">
+        SELECT a_coment_id, ask_id, a_coment_content, mem_id, a_coment_date, a_comment_update
+        FROM ask_coment
+        WHERE a_coment_id = #{a_coment_id}
+    </select>
+    
+   <select id="memselectAll" parameterType="string" resultType="CommentDto">
+        SELECT a_coment_id, ask_id,  a_coment_content, mem_id, a_coment_date, a_comment_update
+        FROM ask_coment
+        WHERE mem_id = #{mem_id}
+        ORDER BY a_coment_date DESC, a_coment_id ASC
+    </select>
+
+    <update id="update" parameterType="CommentDto">
+        UPDATE ask_coment
+        SET a_coment_content = #{a_coment_content}, a_comment_update = now()
+        WHERE a_coment_id = #{a_coment_id} and mem_id = #{mem_id}
+    </update>
+    
+    
+    
+</mapper>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.teamProject.cdcd.memberMapper">
+
+
+
+	<!-- 추가 -->
+	<select resultType="MemberDto" id="selectAll">select * from member where mem_id != 'admin' order by mem_id ASC </select>
+	<!-- 끝 -->
+
+
+	<insert id="insert" parameterType="MemberDto">
+		insert into member (mem_id, mem_pwd, mem_email, mem_phone)
+		values (#{mem_id}, #{mem_pwd}, #{mem_email}, #{mem_phone})
+	</insert>
+	
+	<select id="selectId" resultType="MemberDto">
+		select * from member where mem_id=#{mem_id}
+	</select>
+		
+	<select id="selectEmail" resultType="MemberDto">
+		select * from member where mem_email=#{mem_email}
+	</select>
+	<delete id="delete" parameterType="MemberDto">
+		delete from member where mem_id=#{mem_id}
+	</delete>
+</mapper>

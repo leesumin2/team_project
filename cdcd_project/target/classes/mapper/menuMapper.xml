@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.teamProject.cdcd.menuMapper">
+
+	<insert id="insert" parameterType="MenuDto" useGeneratedKeys="true" keyProperty="menu_id">
+		insert into menu (cafe_id, menu_signature, menu_price)
+		values (#{cafe_id}, #{menu_signature}, #{menu_price})
+	</insert>
+	
+	<update id="update" parameterType="MenuDto">
+			UPDATE menu SET
+							cafe_id=#{cafe_id},
+							menu_signature=#{menu_signature},
+							menu_price=#{menu_price}
+							
+						WHERE menu_id=#{menu_id};
+	</update>
+	
+	<select id="select" resultType="MenuDto">
+		select * from menu where cafe_id=#{cafe_id}
+	</select>
+
+	<delete id="delete" parameterType="Map">
+
+		delete
+			from menu
+			where cafe_id=#{cafe_id}
+				and menu_id not in 
+					<foreach collection="menu_id" item="arr" separator="," open="(" close=")">
+						#{arr}
+					</foreach>
+	
+	</delete>
+	
+	<delete id="deleteAll">
+		delete from menu where cafe_id=#{cafe_id}
+	</delete>
+	
+	
+
+</mapper>

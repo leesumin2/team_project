@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.greenart.bd">
+
+
+	<select id="count" resultType="int">
+		select count(*) from ask
+	</select>
+
+	<select id="selectAll" resultType="BoardDto">
+		select ask_id , ask_title, ask_content,
+		mem_id, ask_viewpoint, ask_comentcnt, ask_date from
+		ask
+		order by ask_date
+		desc, ask_id  desc
+	</select>
+	
+	<select id="select" parameterType="int" resultType="BoardDto">
+		select ask_id ,
+		ask_title, ask_content, mem_id, ask_viewpoint, ask_comentcnt, ask_date
+		from
+		ask
+		where ask_id  =#{ask_id}
+	</select>
+	
+
+	<!-- 게시판 페이지 -->
+	<sql id="selectFromBoard">
+		SELECT ask_id , ask_title, ask_content, mem_id, ask_viewpoint, ask_comentcnt,
+		ask_date
+		FROM ask
+	</sql>
+
+	<select id="selectPage" parameterType="map"
+		resultType="BoardDto">
+		<include refid="selectFromBoard" />
+		ORDER BY ask_date DESC, ask_id  DESC
+		LIMIT #{offset}, #{pageSize}
+	</select>
+
+
+	<!-- 게시판 검색 시작 -->
+	<sql id="searchCondition">
+		<choose>
+			<when test='option=="T"'>
+				and ask_title like concat('%', #{keyword}, '%')
+			</when>
+			<when test='option=="W"'>
+				and mem_id like concat('%', #{keyword}, '%')
+			</when>
+			<otherwise>
+				and (ask_title like concat('%', #{keyword}, '%')
+				or ask_content like concat('%', #{keyword}, '%') )
+			</otherwise>
+		</choose>
+	</sql>
+
+
+	<select id="searchSelectPage0" parameterType="SearchCondition"
+		resultType="BoardDto">
+		<include refid="selectFromBoard" />
+		where true
+		<include refid="searchCondition" />
+		ORDER BY ask_date DESC, ask_id  DESC
+		LIMIT #{offset}, #{pageSize}
+	</select>
+	<select id="searchSelectPage1" parameterType="SearchCondition"
+		resultType="BoardDto">
+		<include refid="selectFromBoard" />
+		where true
+		<include refid="searchCondition" />
+		ORDER BY ask_viewpoint DESC, ask_date  DESC
+		LIMIT #{offset}, #{pageSize}
+	</select>
+	<select id="searchSelectPage2" parameterType="SearchCondition"
+		resultType="BoardDto">
+		<include refid="selectFromBoard" />
+		where true
+		<include refid="searchCondition" />
+		ORDER BY ask_comentcnt DESC , ask_date  DESC
+		LIMIT #{offset}, #{pageSize}
+	</select>
+	
+
+	<select id="searchResultCnt" parameterType="SearchCondition"
+		resultType="int">
+		select count(*) from ask
+		where true
+		<include refid="searchCondition" />
+	</select>
+
+	<!-- 게시판 끝 -->
+
+
+	<delete id="deleteAll">
+		delete from ask
+	</delete>
+
+	<delete id="delete" parameterType="map">
+		delete from ask where
+		ask_id =#{ask_id} and mem_id=#{mem_id}
+	</delete>
+
+	<insert id="insert" parameterType="BoardDto">
+		insert into ask (ask_title,
+		ask_content, mem_id)
+		values (#{ask_title}, #{ask_content}, #{mem_id})
+	</insert>
+
+	<update id="update" parameterType="BoardDto">
+		update ask
+		set
+		ask_title=#{ask_title}, ask_content=#{ask_content}
+		where ask_id =#{ask_id}
+		and mem_id=#{mem_id}
+	</update>
+
+	<update id="increaseViewCnt" parameterType="int">
+		update ask
+		set
+		ask_viewpoint = ask_viewpoint + 1
+		where ask_id = #{ask_id}
+	</update>
+	
+	<!-- 게시판 댓글 증가, 감소 -->
+	<update id="updateCommentCnt" parameterType="map">
+		update ask
+		set ask_comentcnt = ask_comentcnt+ #{ask_comentcnt}
+		where ask_id = #{ask_id}
+	</update>
+	
+	<select id="memselectAll"  parameterType="String" resultType="BoardDto">
+		select * from ask
+		where mem_id  =#{mem_id}
+		order by ask_date desc , ask_id  DESC
+	</select>
+    
+    <select id="viewselectAll" parameterType="string" resultType="BoardDto">
+        SELECT *
+        FROM ask
+        WHERE mem_id = #{mem_id}
+        ORDER BY ask_viewpoint DESC , ask_id  DESC
+    </select>
+    <select id="commentselectAll" parameterType="string" resultType="BoardDto">
+        SELECT *
+        FROM ask
+        WHERE mem_id = #{mem_id}
+        ORDER BY ask_comentcnt DESC , ask_id  DESC
+    </select>
+
+</mapper>
+ 
+ 

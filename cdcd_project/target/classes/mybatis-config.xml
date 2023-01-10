@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+		PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-config.dtd">
+		
+<configuration>
+	<typeAliases>
+		<typeAlias alias="MemberDto" type="com.teamProject.cdcd.dto.MemberDto"/>
+		<typeAlias alias="CafeDto" type="com.teamProject.cdcd.dto.CafeDto"/>
+		<typeAlias alias="BookmarkDto" type="com.teamProject.cdcd.dto.BookmarkDto"/>
+		<typeAlias alias="ReviewDto" type="com.teamProject.cdcd.dto.ReviewDto"/>
+		<typeAlias alias="HashtagDto" type="com.teamProject.cdcd.dto.HashtagDto"/>
+		<typeAlias alias="MenuDto" type="com.teamProject.cdcd.dto.MenuDto"/>
+		<typeAlias alias="SearchOption" type="com.teamProject.cdcd.dto.SearchOption"/>
+		<typeAlias alias="SearchCondition" type="com.teamProject.cdcd.dto.SearchCondition"/>
+		<typeAlias alias="BoardDto" type="com.teamProject.cdcd.dto.BoardDto"/>
+		<typeAlias alias="CommentDto" type="com.teamProject.cdcd.dto.CommentDto"/>
+		<typeAlias alias="ReviewLikeDto" type="com.teamProject.cdcd.dto.ReviewLikeDto"/>
+	</typeAliases>
+</configuration>

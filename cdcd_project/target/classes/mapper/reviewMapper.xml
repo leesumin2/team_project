@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace = "com.teamProject.cdcd">
+	<select id="count" resultType="int">
+		select count(*) from review
+	</select>
+	<select id="selectAll" resultType="ReviewDto"> 
+		select review_id, cafe_id, mem_id, review_content, review_img1, review_img2, coffee_score, dessert_score, mood_score, r_reg_date from review 
+		order by r_reg_date DESC, review_id DESC
+	</select>
+	
+
+	<select id="select" parameterType="int" resultType="ReviewDto">
+		select review_id, cafe_id, mem_id, review_content, review_img1, review_img2, coffee_score, dessert_score, mood_score, r_reg_date  from review where review_id = #{review_id}
+	</select>
+	
+	<delete id="deleteAll">
+		delete from review
+	</delete>
+	
+	<delete id="delete" parameterType="map">
+		delete from review where review_id=#{review_id} and mem_id=#{mem_id}
+	</delete>
+	
+	<insert id="insert" parameterType="ReviewDto">
+		insert into review (cafe_id, review_content, review_img1, review_img2, coffee_score, dessert_score, mood_score, mem_id)
+		values(#{cafe_id}, #{review_content}, #{review_img1, jdbcType=VARCHAR}, #{review_img2, jdbcType=VARCHAR}, #{coffee_score, jdbcType=INTEGER}, #{dessert_score, jdbcType=INTEGER}, #{mood_score, jdbcType=INTEGER}, #{mem_id})
+	</insert>
+	
+	<update id="update" parameterType="ReviewDto">
+		update review
+		set review_content= #{review_content}, review_img1=#{review_img1, jdbcType=VARCHAR}, review_img2= #{review_img2, jdbcType=VARCHAR},
+			coffee_score=#{coffee_score, jdbcType=INTEGER}, dessert_score = #{dessert_score, jdbcType=INTEGER}, mood_score = #{mood_score, jdbcType=INTEGER}
+		where review_id=#{review_id} and mem_id=#{mem_id}
+	</update>
+	
+	<!-- 총평균 -->
+	<select id="total_avg" resultType="ReviewDto">
+		select review.coffee_score, review.dessert_score, review.mood_score, cafe.cafe_id, cafe.cafe_name as name, cafe.cafe_img as img, round((avg(coffee_score) + avg(dessert_score) + avg(mood_score))/3, 1) as avg_
+		from cafe_db.review review
+		join cafe_db.cafe cafe
+		on review.cafe_id = cafe.cafe_id
+		group by cafe_id
+		order by avg_ desc;
+	</select> 
+
+   <select id="selectCafeReview" parameterType="int" resultType="ReviewDto">
+      select * from review where cafe_id = #{cafe_id}
+      order by r_reg_date DESC, review_id DESC
+   </select>
+	<!-- 추가 11.29 -->
+	<!-- 오래된순 -->
+	<select id="selectAllOld" parameterType="int" resultType="ReviewDto">
+		select review_id, cafe_id, mem_id, review_content, review_img1, review_img2, coffee_score, dessert_score, mood_score, r_reg_date 
+		from review 
+		where cafe_id=#{cafe_id}
+		order by r_reg_date ASC
+	</select>
+	
+	<!-- 좋아요순 -->
+	<select id="selectLike" parameterType="int" resultType="ReviewDto">
+		select r.review_id, r.mem_id, r.coffee_score, r.dessert_score, r.mood_score, r.review_img1, r.review_img2,  r.review_content, r.cafe_id,  r.r_reg_date, count(rl.review_id) as r_like
+		from cafe_db.review r
+		left join cafe_db.review_like rl
+		on r.review_id=rl.review_id
+		where cafe_id=#{cafe_id}
+		group by r.review_id
+		order by r_like DESC; 
+	</select>
+	<!-- 끝 -->
+	<select id="reviewList" parameterType="String" resultType="ReviewDto">
+		select r.review_id, r.mem_id,r.coffee_score, r.dessert_score, r.mood_score, r.review_img1, r.review_img2,  r.review_content, c.cafe_name as name, c.cafe_id,  r.r_reg_date
+        from cafe_db.review r
+        join cafe_db.cafe c
+        on r.cafe_id=c.cafe_id
+        where r.mem_id = #{r.mem_id}
+		order by r.r_reg_date DESC; 
+	</select>
+	<!-- 추가 끝 -->
+</mapper>

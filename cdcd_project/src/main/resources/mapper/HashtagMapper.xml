@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.teamProject.cdcd.hashtagMapper">
+
+	
+	<sql id="cafecolumn">
+			cafe.cafe_id, 
+			cafe.cafe_name, 
+			cafe.cafe_img, 
+			cafe_info, 
+			cafe_num, 
+			cafe.cafe_addr1, 
+			cafe.cafe_addr2, 
+			cafe.cafe_addr3, 
+			cafe.cafe_addr4, 
+			cafe_open, 
+			cafe_close,
+			round((avg(coffee_score) + avg(dessert_score) + avg(mood_score))/3, 1) as total_avg
+	</sql>
+	
+
+
+	<sql id="orderBy">
+	
+		<choose>
+			<when test='sort == "G"'>
+				order by total_avg DESC, count(DISTINCT review_id) DESC, count(DISTINCT bm_id) DESC, cafe_name
+			</when>
+			<when test='sort == "R"'>
+				order by count(DISTINCT review_id) DESC, total_avg DESC, count(DISTINCT bm_id) DESC, cafe_name
+			</when>
+			<when test='sort == "B"'>
+				order by count(DISTINCT bm_id) DESC, total_avg DESC, count(DISTINCT review_id) DESC, cafe_name
+			</when>
+			<otherwise>
+				order by cafe_id
+			</otherwise>
+		</choose>
+		
+	</sql>
+	
+
+
+
+
+
+	<insert id="insertHashtag" parameterType="HashtagDto">
+		insert into hashtag (hashtag_content)
+				values (#{hashtag_content})
+	</insert>
+	
+	
+	
+	
+	<insert id="insertCafeHashtag" parameterType="HashtagDto" useGeneratedKeys="true" keyProperty="cafe_hashtag_id">
+		insert into cafe_hashtag (hashtag_id, cafe_id)
+				values (#{hashtag_id}, #{cafe_id})
+	</insert>
+	
+	
+	
+	
+	<select id="select" resultType="HashtagDto">
+		select
+			cafe_hashtag.cafe_hashtag_id,
+			hashtag.hashtag_id,
+			cafe_hashtag.cafe_id,
+            hashtag.hashtag_content
+			
+			from hashtag
+				right outer join cafe_hashtag
+					on hashtag.hashtag_id = cafe_hashtag.hashtag_id
+			
+			where cafe_id=#{cafe_id}
+	</select>
+	
+	
+	
+	<select id="selectAll" resultType="HashtagDto">
+		select * from hashtag order by hashtag_id
+	</select>
+	
+	
+	
+	<select id="selectHashtag" resultType="HashtagDto">
+		select
+			cafe_hashtag.cafe_hashtag_id,
+			hashtag.hashtag_id,
+			cafe_hashtag.cafe_id,
+            hashtag.hashtag_content
+			
+			from hashtag
+				right outer join cafe_hashtag
+					on hashtag.hashtag_id = cafe_hashtag.hashtag_id
+			
+			where 
+				<foreach collection="array" item="hashtag" separator="or">
+					 hashtag_id = #{hashtag }
+				</foreach>
+			
+			group by cafe_id
+				
+	</select>
+
+
+	<delete id="deleteHashtag">
+
+		delete
+			from hashtag
+			where hashtag_id=#{hashtag_id}
+	
+	</delete>
+	
+	<delete id="deleteCafeHashtag" parameterType="Map">
+
+		delete
+			from cafe_hashtag
+			where cafe_id=#{cafe_id}
+				and hashtag_id not in 
+					<foreach collection="hashtag_id" item="arr" separator="," open="(" close=")">
+						#{arr}
+					</foreach>
+	
+	</delete>
+	
+	
+	<delete id="deleteAll">
+		delete
+			from cafe_hashtag
+			where cafe_id=#{cafe_id}
+	</delete>
+	
+	
+
+	<select id="search_H" parameterType="SearchOption" resultType="CafeDto">
+		select
+			
+			<include refid="cafecolumn"></include>
+			
+			from cafe
+				left outer join cafe_hashtag
+					on cafe.cafe_id = cafe_hashtag.cafe_id
+				left outer join review
+					on cafe.cafe_id = review.cafe_id
+				left outer join bookmark
+					on cafe.cafe_id = bookmark.cafe_id
+					
+			where 
+				<foreach collection="hashtag" item="arr" separator="or">
+					 hashtag_id = #{arr }
+				</foreach>
+			
+			group by cafe_id
+			
+			<include refid="orderBy"></include>
+			
+			limit #{offset}, #{pageSize}
+	</select>
+	
+	
+	
+	
+	<select id="search_K_H" parameterType="SearchOption" resultType="CafeDto">	
+		select
+			
+			<include refid="cafecolumn"></include>
+			
+			from cafe
+					left outer join menu 
+						on cafe.cafe_id = menu.cafe_id
+					left outer join cafe_hashtag
+						on cafe.cafe_id = cafe_hashtag.cafe_id
+					left outer join review
+						on cafe.cafe_id = review.cafe_id
+					left outer join bookmark
+						on cafe.cafe_id = bookmark.cafe_id
+						
+			where (cafe_name like concat('%', #{keyword}, '%')
+					or cafe_addr1 like concat('%', #{keyword}, '%')
+					or cafe_addr2 like concat('%', #{keyword}, '%')
+					or cafe_addr3 like concat('%', #{keyword}, '%')
+					or menu_signature like concat('%', #{keyword}, '%'))
+						
+			and (
+				<foreach collection="hashtag" item="arr" separator="or">
+					 hashtag_id = #{arr }
+				</foreach>
+				)
+			
+			group by cafe_id
+
+			<include refid="orderBy"></include>
+			
+			limit #{offset}, #{pageSize}
+	</select>
+	
+	
+	
+</mapper>
